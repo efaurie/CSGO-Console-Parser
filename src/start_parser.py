@@ -1,8 +1,7 @@
 import argparse
 
-from parser_fns import *
 from LogTailer import LogTailer
-from ScoreBoard import ScoreBoard
+from ConsoleParser import ConsoleParser
 from ConsoleParserConfigReader import ConsoleParserConfigReader
 
 def init_parser():
@@ -10,13 +9,12 @@ def init_parser():
     parser.add_argument('-config', default='../resources/csgo-parser.conf', help='The path to the CSGO console.log output location.')
     return parser.parse_args()
 
+
 def run(config):
-    scoreboard = ScoreBoard()
     tailer = LogTailer(config.log_location)
     tailer.start()
-    while True:
-        current_line = tailer.poll()
-        parse(current_line, scoreboard)
+    console_parser = ConsoleParser(tailer)
+    console_parser.listen()
 
 
 if __name__ == '__main__':

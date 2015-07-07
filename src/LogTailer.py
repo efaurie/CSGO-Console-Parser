@@ -24,6 +24,8 @@ class LogTailer:
             if not next_line:
                 break
 
+        tail_process.kill()
+
     def start(self):
         self.running = True
         threading.Thread(target=self.tail_log).start()
