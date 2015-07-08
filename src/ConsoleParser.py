@@ -18,12 +18,12 @@ class ConsoleParser:
             self.csgo_game = CSGOGame()
         elif 'Map:' in log_line:
             self.csgo_game.set_map(log_line.split(' ')[1])
-        elif 'connected' in log_line:
-            self.player_connected(log_line)
         elif 'Damage' in log_line:
             self.damage_report(log_line)
-        elif 'EVERYONE' in log_line:
+        elif '0:  Reinitialized' in log_line:
             self.csgo_game.start_round()
+        elif 'Shutdown function' in log_line:
+            self.csgo_game.end_last_round()
 
     def player_connected(self, log_line):
         split_line = log_line.split(' ')
@@ -36,11 +36,15 @@ class ConsoleParser:
             self.damage_given(log_line)
 
     def damage_given(self, log_line):
-        split_line = log_line.split(' ')
-        given_to = split_line[3][1:-1]
-        self.csgo_game.damage_given(given_to, split_line[5], split_line[7])
+        given_to, damage_amount, hits = self.parse_damage_line(log_line)
+        self.csgo_game.damage_given(given_to, damage_amount, hits)
 
     def damage_received(self, log_line):
-        split_line = log_line.split(' ')
-        given_by = split_line[3][1:-1]
-        self.csgo_game.damage_received(given_by, split_line[5], split_line[7])
+        given_by, damage_amount, hits = self.parse_damage_line(log_line)
+        self.csgo_game.damage_received(given_by, damage_amount, hits)
+
+    def parse_damage_line(self, log_line):
+        split_quote = log_line.split('"')
+        player = split_quote[1]
+        split_space = split_quote[2].split(' ')
+        return player, split_space[2], split_space[4]
